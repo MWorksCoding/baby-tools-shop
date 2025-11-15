@@ -109,69 +109,7 @@ http://localhost:8000
 
 ### 🐳 Create a Docker Container
 
-To containerize your Django project, create a file named **`Dockerfile`** (without any extension) in the same directory as your `manage.py` file.  
-Below is an example configuration tailored for this project:
-
-In your Case it's: 
-
-```
-# ===============================
-# 1. Base image
-# ===============================
-FROM python:3.12-slim
-
-# Prevent Python from writing .pyc files and buffering stdout/stderr
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-# ===============================
-# 2. Set work directory
-# ===============================
-WORKDIR /app
-
-# ===============================
-# 3. Install system dependencies
-# ===============================
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# ===============================
-# 4. Install Python dependencies
-# ===============================
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# ===============================
-# 5. Copy project files
-# ===============================
-COPY . /app/
-
-# ===============================
-# 6. Collect static files
-# ===============================
-RUN python manage.py collectstatic --noinput
-
-# ===============================
-# 7. Create non-root user
-# ===============================
-RUN adduser --disabled-password --no-create-home appuser \
-    && chown -R appuser:appuser /app
-USER appuser
-
-# ===============================
-# 8. Expose port
-# ===============================
-EXPOSE 8025
-
-# ===============================
-# 9. Default command
-# ===============================
-# Runs migrations, then starts Gunicorn server
-CMD ["sh", "-c", "python manage.py migrate && gunicorn babyshop.wsgi:application --bind 0.0.0.0:8025"]
-
-```
+To containerize your Django project, create a file named **`Dockerfile`** (without any extension) in the same directory as your `manage.py` file. A Dockerfile is a text-based document with one purpose: creating a container image. It provides instructions to the image builder on the commands to run, files to copy, startup command, and more.
 
 To reduce image size and improve build performance, create a .dockerignore file in your project root directory with the following content:
 ```
