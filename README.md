@@ -48,7 +48,7 @@ git clone https://github.com/MWorksCoding/baby-tools-shop.git
 
 Create you virtual environment (in your case it's Linux Ubuntu) in your project directory with:
 ```
-    python -m venv venv
+python -m venv venv
 ```
 
 Activate your venv:
@@ -159,15 +159,32 @@ baby-tools-shop/babyshop_app
 1. Build the docker image: 
 
 ```
-    docker build -t babyshop_app .
+docker build -t babyshop_app .
 ```
 
 2. Run the docker container on port 8025:
 ```
-    docker run -d -p 8025:8025 --env-file .env babyshop_app                                     
+docker run -d -p 8025:8025 --env-file .env babyshop_app                                     
 ```
 
 3. Open the container in your browser by visiting http://<ip_server_address>:8025
+
+4. To add products to the Baby Tools Shop, you need access to the Django Admin Panel, which requires a superuser account.
+First of all you need to find out the running Docker Container ID
+
+```
+docker ps
+```
+
+Then you paste this container id here to access the docker container and create a superuser
+```
+docker exec -it <container_id_or_name> python manage.py createsuperuser
+```
+
+You need to enter a username, a email address and a password.
+After that you need to log in as superuser credentials under http://<ip_server_address>:8025/admin
+
+Here you can add some categories, add products and manage existing entries.
 
 
 ### 🧭 Docker Management Commands
