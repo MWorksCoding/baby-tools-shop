@@ -109,7 +109,18 @@ Here you can add some categories, add products and manage existing entries.
 
 To containerize your Django project, create a file named [Dockerfile](babyshop_app/Dockerfile) in the same directory as your `manage.py` file. A Dockerfile is a text-based document with one purpose: creating a container image. It provides instructions to the image builder on the commands to run, files to copy, startup command, and more.
 
-To reduce image size and improve build performance, create a [.dockerignore](babyshop_app/.dockerignore) file.
+To reduce image size and improve build performance, create a .dockerignore file in your project root directory with the following content:
+```
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+.env
+.git
+.gitignore
+```
 
 Before building your Docker image, make sure you have a requirements.txt file that lists all dependencies:
 ```
