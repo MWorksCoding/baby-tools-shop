@@ -19,7 +19,7 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy the Django project code
-COPY . /app/
+COPY ./babyshop_app/ /app/
 
 # Expose port 8000
 EXPOSE 8000
