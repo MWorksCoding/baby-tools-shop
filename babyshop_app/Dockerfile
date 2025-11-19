@@ -23,13 +23,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ===============================
 # 4. Install Python dependencies
 # ===============================
-COPY requirements.txt /app/
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # ===============================
 # 5. Copy project files
 # ===============================
-COPY . /app/
+COPY . ${WORKDIR}
 
 # ===============================
 # 6. Collect static files
