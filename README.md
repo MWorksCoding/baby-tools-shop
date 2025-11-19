@@ -111,7 +111,7 @@ http://localhost:8000
 
 To containerize your Django project, create a file named **`Dockerfile`** (without any extension) in the same directory as your `manage.py` file. A Dockerfile is a text-based document with one purpose: creating a container image. It provides instructions to the image builder on the commands to run, files to copy, startup command, and more.
 
-To reduce image size and improve build performance, create a .dockerignore file in your project root directory with the following content:
+To reduce image size and improve build performance, create a [.dockerignore](babyshop_app/.dockerignore) file in your project root directory with the following content:
 ```
 venv/
 __pycache__/
