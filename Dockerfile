@@ -29,11 +29,12 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # ===============================
 # 5. Copy project files
 # ===============================
-COPY . ${WORKDIR}
+COPY . /app
 
 # ===============================
 # 6. Collect static files
 # ===============================
+WORKDIR /app/babyshop_app
 RUN python manage.py collectstatic --noinput
 
 # ===============================

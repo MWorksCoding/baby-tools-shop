@@ -52,29 +52,12 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Inside your project root, create a .env file with your environment variables:
-```
-touch .env
-```
+Inside your project root, create a .env file with your environment variables.
 
-Set environment variables:
-```
-nano .env
-```
+Add your configuration variables, check [example.env](./example.env).
+You can copy and paste the content, but please keep in mind that the values ​​should only be used for local development for security reasons
 
-Add your configuration variables, check [example.env] :
-```
-SECRET_KEY=<your_django_secret_key_from_setting.py>
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,<ip_server_address>
-```
-
-Navigate to the Django app directory:
-```
-baby-tools-shop/babyshop_app
-```
-
-Build the docker image: 
-
+Build the docker image:
 ```
 docker build -t babyshop_app .
 ```
@@ -84,7 +67,7 @@ Run the docker container on port 8025:
 docker run -d -p 8025:8025 --env-file .env babyshop_app                                     
 ```
 
-Open the container in your browser by visiting http://<ip_server_address>:8025
+Open the container in your browser by visiting http://127.0.0.1:8025
 
 To add products to the Baby Tools Shop, you need access to the Django Admin Panel, which requires a superuser account.
 First of all you need to find out the running Docker Container ID
@@ -99,7 +82,7 @@ docker exec -it <container_id_or_name> python manage.py createsuperuser
 ```
 
 You need to enter a username, a email address and a password.
-After that you need to log in as superuser credentials under http://<ip_server_address>:8025/admin
+After that you need to log in as a admin at http://127.0.0.1:8025/admin
 
 Here you can add some categories, add products and manage existing entries.
 
@@ -107,9 +90,9 @@ Here you can add some categories, add products and manage existing entries.
 
 ### 🐳 Create a Docker Container
 
-To containerize your Django project, create a file named [Dockerfile](babyshop_app/Dockerfile) in the same directory as your `manage.py` file. A Dockerfile is a text-based document with one purpose: creating a container image. It provides instructions to the image builder on the commands to run, files to copy, startup command, and more.
+To containerize your Django project, create a file named [Dockerfile](./Dockerfile) in the same directory as your `manage.py` file. A Dockerfile is a text-based document with one purpose: creating a container image. It provides instructions to the image builder on the commands to run, files to copy, startup command, and more.
 
-To reduce image size and improve build performance, create a [.dockerignore](babyshop_app/.dockerignore) file.
+To reduce image size and improve build performance, create a [.dockerignore](./.dockerignore) file.
 
 Before building your Docker image, make sure you have a requirements.txt file that lists all dependencies:
 ```
