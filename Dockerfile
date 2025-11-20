@@ -1,28 +1,56 @@
-# Use an official lightweight Python image
+# ===============================
+# 1. Base image
+# ===============================
 FROM python:3.12-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Prevent Python from writing .pyc files and buffering stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Set working directory
+# ===============================
+# 2. Set work directory
+# ===============================
 WORKDIR /app
 
-# Install system dependencies (for psycopg2, Pillow, etc.)
+# ===============================
+# 3. Install system dependencies
+# ===============================
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt /app/
+# ===============================
+# 4. Install Python dependencies
+# ===============================
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy the Django project code
-COPY ./babyshop_app/ /app/
+# ===============================
+# 5. Copy project files
+# ===============================
+COPY . /app
 
-# Expose port 8000
-EXPOSE 8000
+# ===============================
+# 6. Collect static files
+# ===============================
+WORKDIR /app/babyshop_app
+RUN python manage.py collectstatic --noinput
 
-# Default command to run your app
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# ===============================
+# 7. Create non-root user
+# ===============================
+RUN adduser --disabled-password --no-create-home appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
+# ===============================
+# 8. Expose port
+# ===============================
+EXPOSE 8025
+
+# ===============================
+# 9. Default command
+# ===============================
+# Runs migrations, then starts Gunicorn server
+CMD ["sh", "-c", "python manage.py migrate && gunicorn babyshop.wsgi:application --bind 0.0.0.0:8025"]
