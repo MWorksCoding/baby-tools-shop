@@ -89,7 +89,7 @@ Here you can add some categories, add products and manage existing entries.
 ### 🧸 Fill the shop with sample data
 
 If you don't want to add products by hand, you can fill the database with random sample data.
-This creates 8 categories (Strollers, Car Seats, Feeding, ...) and 40 products with a price, description and placeholder image:
+This creates 8 categories (Strollers, Car Seats, Feeding, ...) and 40 products with a price, description and a matching illustration in the product's color:
 ```
 docker exec -it <container_id_or_name> python manage.py seed_products
 ```

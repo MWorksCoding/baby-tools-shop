@@ -18,10 +18,10 @@
           <div class="row">
             {% for product in products %}
             <div class="card  mt-3" style="width: 18rem;">
-              <img src="{{product.image.url}}" class="card-img-top" width="300" height="230">
+              <img src="{{product.image.url}}" class="card-img-top" width="300" height="230" style="object-fit: cover">
               <div class="card-body">
                 <h5 class="card-title"> <a href="{% url 'product_detail' product.category.slug product.id %}">{{product.name}}</a></h5>
-                <div class="mb-1 text-muted">{{product.price}} &#8378;</div>
+                <div class="mb-1 text-muted">${{product.price}}</div>
                 <p class="card-text">{{product.description | truncatechars:80}}</p>
                 <a href="{% url 'product_detail' product.category.slug product.id %}" class="btn btn-primary">View details</a>
               </div>

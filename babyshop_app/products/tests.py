@@ -2,9 +2,12 @@ import shutil
 import tempfile
 from io import StringIO
 
+from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 
+from .management.commands.seed_products import CATEGORIES
+from .management.illustrations import DRAWINGS
 from .models import Product
 
 MEDIA_ROOT = tempfile.mkdtemp()
@@ -28,6 +31,16 @@ class SeedProductsCommandTests(TestCase):
         for product in Product.objects.all():
             self.assertIsNotNone(product.category)
             self.assertTrue(product.image.storage.exists(product.image.name))
+
+    def test_every_item_has_a_drawing(self):
+        for data in CATEGORIES:
+            for item in data["items"]:
+                self.assertIn(item, DRAWINGS)
+
+    def test_creates_default_image(self):
+        seed(count=1)
+        default_image = Product._meta.get_field("image").default
+        self.assertTrue(default_storage.exists(default_image))
 
     def test_does_not_duplicate_without_clear(self):
         seed(count=5)

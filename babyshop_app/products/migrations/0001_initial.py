@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Product',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Ürünün Adı', max_length=80, verbose_name='Ürün Adı')),
+                ('name', models.CharField(help_text='Name of the product', max_length=80, verbose_name='Product name')),
                 ('describtion', models.TextField()),
                 ('image', models.ImageField(default='products/broken-1.png', upload_to='products/%Y/%m/%d/')),
                 ('date', models.DateField(auto_now=True)),
