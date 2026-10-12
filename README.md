@@ -86,6 +86,25 @@ After that you need to log in as a admin at http://127.0.0.1:8025/admin
 
 Here you can add some categories, add products and manage existing entries.
 
+### 🧸 Fill the shop with sample data
+
+If you don't want to add products by hand, you can fill the database with random sample data.
+This creates 8 categories (Strollers, Car Seats, Feeding, ...) and 40 products with a price, description and placeholder image:
+```
+docker exec -it <container_id_or_name> python manage.py seed_products
+```
+
+If the shop already contains products, nothing is created. To replace all existing products with new random ones, use `--clear`:
+```
+docker exec -it <container_id_or_name> python manage.py seed_products --clear
+```
+
+More options:
+- `--count 100` creates 100 products instead of 40
+- `--seed 42` creates the same data on every run
+
+Note: The database lives inside the container, so a new container starts empty and you need to run the command again.
+
 ## 🧑‍💻 Usage
 
 ### 🐳 Create a Docker Container
