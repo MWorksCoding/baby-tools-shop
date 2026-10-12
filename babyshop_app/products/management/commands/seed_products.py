@@ -3,11 +3,12 @@ from decimal import Decimal
 from io import BytesIO
 
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
-from PIL import Image, ImageDraw, ImageFont
 
+from products.management.illustrations import illustration
 from products.models import Category, Product
 
 CATEGORIES = [
@@ -18,7 +19,7 @@ CATEGORIES = [
         "price": (149, 899),
         "items": ["Stroller", "Travel System", "Jogging Stroller", "Compact Buggy", "Pram", "Double Stroller"],
         "features": [
-            "One-hand fold makes it easy to stow in any car boot.",
+            "One-hand fold makes it easy to stow in any car trunk.",
             "All-terrain wheels with suspension keep the ride smooth.",
             "The extra-large basket fits a full day's essentials.",
             "A reversible seat lets your baby face you or the world.",
@@ -74,7 +75,7 @@ CATEGORIES = [
         "price": (7, 89),
         "items": ["Rattle", "Plush Bunny", "Stacking Rings", "Activity Gym", "Teether", "Wooden Puzzle", "Musical Mobile", "Shape Sorter"],
         "features": [
-            "Bright colours and contrasting patterns stimulate the senses.",
+            "Bright colors and contrasting patterns stimulate the senses.",
             "Encourages fine motor skills and hand-eye coordination.",
             "Made with non-toxic, child-safe paints and materials.",
             "Easy to wipe clean after play.",
@@ -127,7 +128,16 @@ CATEGORIES = [
 
 BRANDS = ["Little Lamb", "Bumblebee Baby", "Pebble & Pip", "Moonbeam", "Snugglebug", "Tiny Otter", "Honeydew Kids", "Sprout & Co"]
 ADJECTIVES = ["Cozy", "Classic", "Comfort", "Deluxe", "Eco", "Mini", "Pro", "Lite", "Dreamy", "Soft"]
-COLORS = ["Mint", "Sand", "Sky Blue", "Blush", "Graphite", "Oat", "Sage", "Lavender"]
+COLORS = {
+    "Mint": (152, 222, 200),
+    "Sand": (226, 198, 160),
+    "Sky Blue": (140, 195, 240),
+    "Blush": (244, 172, 183),
+    "Graphite": (110, 116, 128),
+    "Oat": (232, 216, 186),
+    "Sage": (168, 192, 150),
+    "Lavender": (186, 168, 228),
+}
 GENERIC_FEATURES = [
     "Free from BPA, PVC and phthalates.",
     "Tested to the latest European safety standards.",
@@ -138,26 +148,7 @@ GENERIC_FEATURES = [
 CENTS = [Decimal("0.00"), Decimal("0.49"), Decimal("0.95"), Decimal("0.99")]
 
 
-def placeholder_image(title, subtitle, color):
-    image = Image.new("RGB", (600, 460), color)
-    draw = ImageDraw.Draw(image)
-    draw.rounded_rectangle((30, 30, 570, 430), radius=28, fill=(255, 255, 255))
-    draw.ellipse((260, 70, 340, 150), fill=color)
-
-    words, lines = title.split(), [""]
-    for word in words:
-        candidate = f"{lines[-1]} {word}".strip()
-        if len(candidate) > 20 and lines[-1]:
-            lines.append(word)
-        else:
-            lines[-1] = candidate
-
-    draw.multiline_text(
-        (300, 265), "\n".join(lines), font=ImageFont.load_default(size=40),
-        fill=(51, 51, 51), anchor="mm", align="center", spacing=10,
-    )
-    draw.text((300, 395), subtitle.upper(), font=ImageFont.load_default(size=22), fill=(120, 120, 120), anchor="mm")
-
+def png(image):
     buffer = BytesIO()
     image.save(buffer, format="PNG")
     return ContentFile(buffer.getvalue())
@@ -174,9 +165,9 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         rng = random.Random(options["seed"])
+        default_image = Product._meta.get_field("image").default
 
         if options["clear"]:
-            default_image = Product._meta.get_field("image").default
             for product in Product.objects.all():
                 if product.image and product.image.name != default_image:
                     product.image.delete(save=False)
@@ -193,16 +184,19 @@ class Command(BaseCommand):
             category, _ = Category.objects.get_or_create(slug=data["slug"], defaults={"name": data["name"]})
             categories.append((category, data))
 
+        # Shown for products that are added in the admin without an image
+        if not default_storage.exists(default_image):
+            default_storage.save(default_image, png(illustration(None, (200, 200, 215), (222, 222, 230))))
+
         used_names = set()
         for i in range(options["count"]):
             category, data = categories[i % len(categories)]
 
-            name = None
-            while name is None or name in used_names:
-                name = (
-                    f"{rng.choice(BRANDS)} {rng.choice(ADJECTIVES)} "
-                    f"{rng.choice(data['items'])} ({rng.choice(COLORS)})"
-                )
+            while True:
+                item, color = rng.choice(data["items"]), rng.choice(list(COLORS))
+                name = f"{rng.choice(BRANDS)} {rng.choice(ADJECTIVES)} {item} ({color})"
+                if name not in used_names:
+                    break
             used_names.add(name)
 
             features = rng.sample(data["features"], 2) + rng.sample(GENERIC_FEATURES, 1)
@@ -213,7 +207,7 @@ class Command(BaseCommand):
                 price=Decimal(rng.randint(low, high)) + rng.choice(CENTS),
                 category=category,
             )
-            product.image.save(f"{slugify(name)}.png", placeholder_image(name, category.name, data["color"]), save=False)
+            product.image.save(f"{slugify(name)}.png", png(illustration(item, COLORS[color], data["color"])), save=False)
             product.save()
 
         self.stdout.write(self.style.SUCCESS(
